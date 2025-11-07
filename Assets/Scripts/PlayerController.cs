@@ -1,55 +1,71 @@
-using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public Transform movePoint;
-    public float stepSize = 1f;
-    private bool canMove = true;
-  
+    [Header("Movement")]
+    public float moveSpeed = 3.5f;          // top speed
+    public float smoothTime = 0.12f;      // higher = more delay/laggy follow
+    public float stopRadius = 0.6f;      // don't jitter when very close
 
+    private Rigidbody2D rb;
+    private Vector2 velocityRef;          // used by SmoothDamp
+    private Vector2 targetPos;            // world-space target (mouse)
+    private bool following;               // only follow while holding LMB
 
-    private void Start()
+    void Awake()
     {
-        // detatch from parent
-        movePoint.parent = null;
-        
-    }
+        rb = GetComponent<Rigidbody2D>();
+     }
 
-    private void Update()
+    void Update()
     {
-        // move towards movepoint
-        transform.position = Vector3.MoveTowards(transform.position, movePoint.position, moveSpeed * Time.deltaTime);
-        
-        // only read new input when at new point
-        if (canMove && Vector3.Distance(transform.position, movePoint.position) <= 0.05f && Input.GetMouseButtonDown(0))
+        // Update target continuously while holding LMB
+        if (Input.GetMouseButton(0))
         {
-            // mouse in world space
-            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mouseWorld.z = transform.position.z;
-
-            Vector2 delta = mouseWorld - transform.position;
-
-            // choose dominant axis
-            if (Mathf.Abs(delta.x) >= Mathf.Abs(delta.y))
-            {
-                movePoint.position += new Vector3(Mathf.Sign(delta.x) * stepSize, 0f, 0f);
-                StartCoroutine(MoveTimer(0.5f));
-            }
-
-            else
-            {
-                movePoint.position += new Vector3(0f, Mathf.Sign(delta.y) * stepSize, 0f);
-                StartCoroutine(MoveTimer(0.5f));
-            }
+            following = true;
+            Vector3 m = GetMouseWorldOnPlayerPlane();
+            targetPos = new Vector2(m.x, m.y);
+        }
+        else
+        {
+            following = false;
         }
     }
 
-    private IEnumerator MoveTimer(float duration)
+    void FixedUpdate()
     {
-        canMove = false;
-        yield return new WaitForSeconds(duration);
-        canMove = true;
+        Vector2 pos = rb.position;
+
+        Vector2 desiredVel = Vector2.zero;
+
+        if (following)
+        {
+            Vector2 toTarget = targetPos - pos;
+            if (toTarget.sqrMagnitude > stopRadius * stopRadius)
+            {
+                desiredVel = toTarget.normalized * moveSpeed;
+            }
+        }
+
+        // SmoothDamp current velocity toward the desired velocity
+        // slight delay
+        rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, desiredVel, ref velocityRef, smoothTime);
+    }
+
+    Vector3 GetMouseWorldOnPlayerPlane()
+    {
+        Camera cam = Camera.main;
+        if (cam.orthographic)
+        {
+            Vector3 p = cam.ScreenToWorldPoint(Input.mousePosition);
+            p.z = transform.position.z;        // keep same Z as player
+            return p;
+        }
+        else
+        {
+            Ray r = cam.ScreenPointToRay(Input.mousePosition);
+            float t = (transform.position.z - r.origin.z) / r.direction.z;
+            return r.origin + r.direction * t;
+        }
     }
 }
