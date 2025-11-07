@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public float stopRadius = 0.6f;      // don't jitter when very close
 
     private Rigidbody2D rb;
+    private SpriteRenderer sr;
     private Vector2 velocityRef;          // used by SmoothDamp
     private Vector2 targetPos;            // world-space target (mouse)
     private bool following;               // only follow while holding LMB
@@ -15,7 +16,8 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-     }
+        sr = GetComponentInChildren<SpriteRenderer>();
+    }
 
     void Update()
     {
@@ -30,6 +32,12 @@ public class PlayerController : MonoBehaviour
         {
             following = false;
         }
+
+        // Flip sprite based on left and right since same anim
+        if (rb.linearVelocity.x > 0.05f)
+            sr.flipX = false;
+        else if (rb.linearVelocity.x < -0.05f)
+            sr.flipX = true;
     }
 
     void FixedUpdate()
@@ -50,6 +58,9 @@ public class PlayerController : MonoBehaviour
         // SmoothDamp current velocity toward the desired velocity
         // slight delay
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, desiredVel, ref velocityRef, smoothTime);
+
+        
+        
     }
 
     Vector3 GetMouseWorldOnPlayerPlane()
