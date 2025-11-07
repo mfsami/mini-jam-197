@@ -1,5 +1,6 @@
-using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class LogPositions : MonoBehaviour
 {
@@ -7,11 +8,13 @@ public class LogPositions : MonoBehaviour
     public Transform ghostPrefab;
     public Transform originPoint;
 
-    public float windowSeconds = 20f;
-    private int maxFrames;
+    public float windowSeconds = 10f; // recording window
+    public float rewindSeconds = 10f; // how far back to rewind
 
+    private int maxFrames;
     private List<Vector3> positions = new List<Vector3>();
     private bool recording = true;
+    private bool canRewind = true;
 
     void Awake()
     {
@@ -20,23 +23,11 @@ public class LogPositions : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(1) && positions.Count > 0)
+        if (Input.GetMouseButtonDown(1) && positions.Count > 0 && canRewind)
         {
-            // Copy current positions for this ghost
-            List<Vector3> ghostFrames = new List<Vector3>(positions);
 
-            // Spawn ghost at player's position (or origin, if you prefer)
-            Transform ghost = Instantiate(ghostPrefab, player.position, Quaternion.identity);
+            StartCoroutine(RewindAndSpawnGhost());
 
-            // Start coroutine so this ghost replays its own copy
-            StartCoroutine(ReplayGhost(ghost, ghostFrames));
-
-            // Teleport player back to origin
-            player.position = originPoint.position;
-
-            // Clear list and resume recording fresh
-            positions.Clear();
-            recording = true;
         }
     }
 
@@ -44,17 +35,47 @@ public class LogPositions : MonoBehaviour
     {
         if (!recording) return;
 
-        // Record positions 
+        // record positions 
         positions.Add(player.position);
 
-        // Keep only last 20 seconds
+        // keep only last 20 seconds
         if (positions.Count > maxFrames)
             positions.RemoveAt(0);
     }
 
-    private System.Collections.IEnumerator ReplayGhost(Transform ghost, List<Vector3> frames)
+    private IEnumerator RewindAndSpawnGhost()
     {
-        // Move ghost along recorded path, one frame per FixedUpdate
+        canRewind = false;
+        recording = false;
+
+        // make a snapshot for ghost before we start rewinding
+        List<Vector3> ghostFrames = new List<Vector3>(positions);
+
+        // rewind player
+        float timeToRewind = Mathf.Min(rewindSeconds, windowSeconds);
+        int framesToRewind = Mathf.CeilToInt(timeToRewind / Time.fixedDeltaTime);
+
+        // play positions backwards 
+        int step = 2;
+        for (int i = positions.Count - 1; i >= Mathf.Max(0, positions.Count - framesToRewind); i-= step)
+        {
+            player.position = positions[i];
+            yield return new WaitForFixedUpdate();
+        }
+
+        // ghost spawn
+        Transform ghost = Instantiate(ghostPrefab, player.position, Quaternion.identity);
+        StartCoroutine(ReplayGhost(ghost, ghostFrames));
+
+        // clear & resume recording
+        positions.Clear();
+        recording = true;
+        canRewind = true;
+    }
+
+    private IEnumerator ReplayGhost(Transform ghost, List<Vector3> frames)
+    {
+        // play the ghost forward
         for (int i = 0; i < frames.Count; i++)
         {
             if (ghost == null) yield break;
@@ -62,8 +83,9 @@ public class LogPositions : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        // Destroy after replay finishes
         if (ghost != null)
+            // wait a bit before immedatley destroying
+            yield return new WaitForSeconds(2);
             Destroy(ghost.gameObject);
     }
 }
