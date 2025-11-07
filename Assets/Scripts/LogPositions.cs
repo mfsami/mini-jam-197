@@ -1,19 +1,17 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.Apple.ReplayKit;
+
 public class LogPositions : MonoBehaviour
 {
-    List<Vector3> positions = new List<Vector3>();
     public Transform player;
     public Transform ghostPrefab;
-    private Transform activeGhost;
-    public bool recording = true;
     public Transform originPoint;
 
-    
-    public float windowSeconds = 20f; // recording window seconds
-    private int replayIndex = -1;
+    public float windowSeconds = 20f;
     private int maxFrames;
+
+    private List<Vector3> positions = new List<Vector3>();
+    private bool recording = true;
 
     void Awake()
     {
@@ -22,45 +20,50 @@ public class LogPositions : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) && positions.Count > 0)
         {
-            // spawn ghost
-            activeGhost = Instantiate(ghostPrefab, originPoint.position, Quaternion.identity);
-            recording = false;
-            
+            // Copy current positions for this ghost
+            List<Vector3> ghostFrames = new List<Vector3>(positions);
+
+            // Spawn ghost at player's position (or origin, if you prefer)
+            Transform ghost = Instantiate(ghostPrefab, player.position, Quaternion.identity);
+
+            // Start coroutine so this ghost replays its own copy
+            StartCoroutine(ReplayGhost(ghost, ghostFrames));
+
+            // Teleport player back to origin
             player.position = originPoint.position;
 
-            // start from the oldest (play forward in time)
-            replayIndex = positions.Count - 1;
+            // Clear list and resume recording fresh
+            positions.Clear();
+            recording = true;
         }
     }
 
     void FixedUpdate()
     {
-        if (recording)
-        {
-            // record newest at the END 
-            positions.Insert(0, player.position);
+        if (!recording) return;
 
-            // cap to last 20s
-            if (positions.Count > maxFrames)
-                positions.RemoveAt(0);
-        }
-        else
-        {
-            // step one frame per physics tick
-            if (replayIndex >= 0)
-            {
-                activeGhost.position = positions[replayIndex];
-                replayIndex--;
-            }
-            else
-            {
-                // done replaying: clear and resume recording fresh
-                positions.Clear();
-                recording = true;
-            }
-        }
+        // Record positions 
+        positions.Add(player.position);
+
+        // Keep only last 20 seconds
+        if (positions.Count > maxFrames)
+            positions.RemoveAt(0);
     }
 
+    private System.Collections.IEnumerator ReplayGhost(Transform ghost, List<Vector3> frames)
+    {
+        // Move ghost along recorded path, one frame per FixedUpdate
+        for (int i = 0; i < frames.Count; i++)
+        {
+            if (ghost == null) yield break;
+            ghost.position = frames[i];
+            yield return new WaitForFixedUpdate();
+        }
+
+        // Destroy after replay finishes
+        if (ghost != null)
+            Destroy(ghost.gameObject);
+    }
 }
