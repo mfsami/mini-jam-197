@@ -1284,6 +1284,8 @@ MonoBehaviour:
   rewindUI: {fileID: 1767825410}
   windowSeconds: 20
   rewindSeconds: 10
+  ghostTrailPrefab: {fileID: 4366153088726277798, guid: 9031e7258f112a4498bb5e0c6485e81b, type: 3}
+  ghostSpawnRate: 0.05
 --- !u!1 &1767825406
 GameObject:
   m_ObjectHideFlags: 0

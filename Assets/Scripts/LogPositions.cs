@@ -9,8 +9,8 @@ public class LogPositions : MonoBehaviour
     public Transform originPoint;
     public RewindUI rewindUI;
 
-    public float windowSeconds = 10f; // recording window
-    public float rewindSeconds = 10f; // how far back to rewind
+    public float windowSeconds = 5f; // recording window
+    public float rewindSeconds = 5f; // how far back to rewind
 
     private int maxFrames;
     private List<Vector3> positions = new List<Vector3>();
@@ -20,6 +20,12 @@ public class LogPositions : MonoBehaviour
     // UI Stuff
     private float timerSeconds = 0f;
     private bool isRewinding = false;
+
+
+    // ghost trail stuff
+    [SerializeField] private GameObject ghostTrailPrefab;
+    [SerializeField] private float ghostSpawnRate = 0.05f;
+    private float ghostTimer;
 
     void Start()
     {
@@ -90,7 +96,7 @@ public class LogPositions : MonoBehaviour
         for (int i = positions.Count - 1; i >= Mathf.Max(0, positions.Count - framesToRewind); i-= step)
         {
             player.position = positions[i];
-
+            GhostTrail();
             // countdown the UI timer toward target
             timerSeconds = Mathf.Max(targetTime, timerSeconds - perStepSeconds);
             rewindUI?.SetTimerSeconds(timerSeconds);
@@ -111,6 +117,35 @@ public class LogPositions : MonoBehaviour
         rewindUI?.SetRewindState(false);
 
         canRewind = true;
+    }
+
+    private static readonly Color[] SandivistanPalette = {
+        new Color32(255, 79, 163, 120),  // Neon pink
+        new Color32(0, 255, 255, 120),   // Cyan
+        new Color32(163, 106, 255, 120), // Violet
+        new Color32(255, 214, 10, 120),  // Yellow
+        new Color32(64, 255, 128, 120)   // Mint green
+    };
+    private void GhostTrail()
+    {
+        // spawn the ghost trail every few frames
+        ghostTimer += Time.deltaTime;
+        if (ghostTimer >= ghostSpawnRate)
+        {
+            var ghost = Instantiate(ghostTrailPrefab, player.position, Quaternion.identity);
+            var sr = ghost.GetComponent<SpriteRenderer>();
+
+            Color c = SandivistanPalette[Random.Range(0, SandivistanPalette.Length)];
+            sr.color = c;
+
+
+            float pulse = Mathf.Sin(Time.time * 20f) * 0.5f + 1f;
+
+            sr.material.SetColor("_EmissionColor", c * pulse * 1.5f);
+            sr.material.SetFloat("_Glossiness", 0.8f);
+
+            ghostTimer = 0f;
+        }
     }
 
     private IEnumerator ReplayGhost(Transform ghost, List<Vector3> frames)
