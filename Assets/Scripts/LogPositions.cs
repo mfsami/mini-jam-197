@@ -17,6 +17,9 @@ public class LogPositions : MonoBehaviour
     private bool recording = true;
     private bool canRewind = true;
 
+    [SerializeField] private int ghostCap = 3;
+    private int activeGhosts = 0;
+
     // UI Stuff
     private float timerSeconds = 0f;
     private bool isRewinding = false;
@@ -50,7 +53,7 @@ public class LogPositions : MonoBehaviour
         }
 
 
-        if (Input.GetMouseButtonDown(1) && positions.Count > 0 && canRewind)
+        if (Input.GetMouseButtonDown(1) && positions.Count > 0 && canRewind && activeGhosts < ghostCap)
         {
 
             StartCoroutine(RewindAndSpawnGhost());
@@ -106,6 +109,7 @@ public class LogPositions : MonoBehaviour
 
         // ghost spawn
         Transform ghost = Instantiate(ghostPrefab, player.position, Quaternion.identity);
+        activeGhosts++;
         StartCoroutine(ReplayGhost(ghost, ghostFrames));
 
         // clear & resume recording
@@ -156,5 +160,7 @@ public class LogPositions : MonoBehaviour
             // wait a bit before immedatley destroying
             yield return new WaitForSeconds(2);
             Destroy(ghost.gameObject);
+
+        activeGhosts = Mathf.Max(0, activeGhosts - 1);
     }
 }
