@@ -7,6 +7,7 @@ public class LogPositions : MonoBehaviour
     public Transform player;
     public Transform ghostPrefab;
     public Transform originPoint;
+    public RewindUI rewindUI;
 
     public float windowSeconds = 10f; // recording window
     public float rewindSeconds = 10f; // how far back to rewind
@@ -15,6 +16,12 @@ public class LogPositions : MonoBehaviour
     private List<Vector3> positions = new List<Vector3>();
     private bool recording = true;
     private bool canRewind = true;
+
+    void Start()
+    {
+        // show REC on boot
+        rewindUI?.SetRewindState(false);   
+    }
 
     void Awake()
     {
@@ -48,6 +55,9 @@ public class LogPositions : MonoBehaviour
         canRewind = false;
         recording = false;
 
+        // set rewind ui
+        rewindUI?.SetRewindState(true);
+
         // make a snapshot for ghost before we start rewinding
         List<Vector3> ghostFrames = new List<Vector3>(positions);
 
@@ -70,6 +80,10 @@ public class LogPositions : MonoBehaviour
         // clear & resume recording
         positions.Clear();
         recording = true;
+
+        // set back to rec
+        rewindUI?.SetRewindState(false);
+
         canRewind = true;
     }
 
