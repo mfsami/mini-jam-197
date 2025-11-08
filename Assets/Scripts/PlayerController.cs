@@ -13,10 +13,13 @@ public class PlayerController : MonoBehaviour
     private Vector2 targetPos;            // world-space target (mouse)
     private bool following;               // only follow while holding LMB
 
+    private Animator anim;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponentInChildren<SpriteRenderer>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -52,6 +55,7 @@ public class PlayerController : MonoBehaviour
             if (toTarget.sqrMagnitude > stopRadius * stopRadius)
             {
                 desiredVel = toTarget.normalized * moveSpeed;
+                
             }
         }
 
@@ -59,8 +63,9 @@ public class PlayerController : MonoBehaviour
         // slight delay
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, desiredVel, ref velocityRef, smoothTime);
 
-        
-        
+        float speed = rb.linearVelocity.magnitude;
+        anim.SetFloat("Speed", rb.linearVelocity.magnitude);
+
     }
 
     Vector3 GetMouseWorldOnPlayerPlane()

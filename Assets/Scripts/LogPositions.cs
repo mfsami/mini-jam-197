@@ -138,12 +138,6 @@ public class LogPositions : MonoBehaviour
             Color c = SandivistanPalette[Random.Range(0, SandivistanPalette.Length)];
             sr.color = c;
 
-
-            float pulse = Mathf.Sin(Time.time * 20f) * 0.5f + 1f;
-
-            sr.material.SetColor("_EmissionColor", c * pulse * 1.5f);
-            sr.material.SetFloat("_Glossiness", 0.8f);
-
             ghostTimer = 0f;
         }
     }
