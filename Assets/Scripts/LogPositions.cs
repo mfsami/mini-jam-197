@@ -17,10 +17,15 @@ public class LogPositions : MonoBehaviour
     private bool recording = true;
     private bool canRewind = true;
 
+    // UI Stuff
+    private float timerSeconds = 0f;
+    private bool isRewinding = false;
+
     void Start()
     {
         // show REC on boot
-        rewindUI?.SetRewindState(false);   
+        rewindUI?.SetRewindState(false);
+        rewindUI?.SetTimerSeconds(timerSeconds);
     }
 
     void Awake()
@@ -30,6 +35,15 @@ public class LogPositions : MonoBehaviour
 
     void Update()
     {
+
+        // count up continuously while not rewinding
+        if (!isRewinding)
+        {
+            timerSeconds += Time.deltaTime;
+            rewindUI?.SetTimerSeconds(timerSeconds);
+        }
+
+
         if (Input.GetMouseButtonDown(1) && positions.Count > 0 && canRewind)
         {
 
@@ -54,6 +68,7 @@ public class LogPositions : MonoBehaviour
     {
         canRewind = false;
         recording = false;
+        isRewinding = true;
 
         // set rewind ui
         rewindUI?.SetRewindState(true);
@@ -61,15 +76,25 @@ public class LogPositions : MonoBehaviour
         // make a snapshot for ghost before we start rewinding
         List<Vector3> ghostFrames = new List<Vector3>(positions);
 
-        // rewind player
-        float timeToRewind = Mathf.Min(rewindSeconds, windowSeconds);
-        int framesToRewind = Mathf.CeilToInt(timeToRewind / Time.fixedDeltaTime);
+        // how much we can actually rewind (can’t go before time 0)
+        float available = Mathf.Min(windowSeconds, timerSeconds); 
+        float want = Mathf.Min(rewindSeconds, available);
+        int framesToRewind = Mathf.CeilToInt(want / Time.fixedDeltaTime);
 
-        // play positions backwards 
-        int step = 2;
+        // target time = (now - want); we’ll count DOWN to this while rewinding
+        float targetTime = timerSeconds - want;
+        int step = 2;                       
+        float perStepSeconds = step * Time.fixedDeltaTime;
+
+        // play positions backwards and decrement timer
         for (int i = positions.Count - 1; i >= Mathf.Max(0, positions.Count - framesToRewind); i-= step)
         {
             player.position = positions[i];
+
+            // countdown the UI timer toward target
+            timerSeconds = Mathf.Max(targetTime, timerSeconds - perStepSeconds);
+            rewindUI?.SetTimerSeconds(timerSeconds);
+
             yield return new WaitForFixedUpdate();
         }
 
@@ -80,6 +105,7 @@ public class LogPositions : MonoBehaviour
         // clear & resume recording
         positions.Clear();
         recording = true;
+        isRewinding = false;
 
         // set back to rec
         rewindUI?.SetRewindState(false);
