@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
     private Vector2 targetPos;            // world-space target (mouse)
     private bool following;               // only follow while holding LMB
 
+    public bool inputLocked = false;
+
     private Animator anim;
 
     void Awake()
@@ -24,6 +26,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (inputLocked) return;
+
         // Update target continuously while holding LMB
         if (Input.GetMouseButton(0))
         {
@@ -63,7 +67,7 @@ public class PlayerController : MonoBehaviour
         // slight delay
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, desiredVel, ref velocityRef, smoothTime);
 
-        float speed = rb.linearVelocity.magnitude;
+        //float speed = rb.linearVelocity.magnitude;
         anim.SetFloat("Speed", rb.linearVelocity.magnitude);
 
     }

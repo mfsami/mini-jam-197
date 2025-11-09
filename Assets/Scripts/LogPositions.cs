@@ -75,6 +75,15 @@ public class LogPositions : MonoBehaviour
 
     private IEnumerator RewindAndSpawnGhost()
     {
+        //disable player inputs
+        var controller = player.GetComponent<PlayerController>();
+
+        if (controller != null)
+        {
+            controller.inputLocked = true; 
+        }
+
+
         canRewind = false;
         recording = false;
         isRewinding = true;
@@ -119,6 +128,9 @@ public class LogPositions : MonoBehaviour
 
         // set back to rec
         rewindUI?.SetRewindState(false);
+
+        // unlock inputs
+        controller.inputLocked = false;
 
         canRewind = true;
     }

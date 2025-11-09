@@ -328,7 +328,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -767, y: 431}
+  m_AnchoredPosition: {x: -522, y: 305}
   m_SizeDelta: {x: 270.19995, y: 103.058014}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &519420028
@@ -552,8 +552,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22.13
-  m_fontSizeBase: 22.13
+  m_fontSize: 17
+  m_fontSizeBase: 17
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -604,6 +604,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 567674468}
   m_CullTransparentMesh: 1
+--- !u!1 &578336347
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 578336348}
+  m_Layer: 0
+  m_Name: FallPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &578336348
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 578336347}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.53, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1814482942}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -1204,6 +1235,7 @@ MonoBehaviour:
   moveSpeed: 3.5
   smoothTime: 0.12
   stopRadius: 0.6
+  inputLocked: 0
 --- !u!50 &1760626967
 Rigidbody2D:
   serializedVersion: 5
@@ -1316,14 +1348,14 @@ RectTransform:
   m_GameObject: {fileID: 1767825406}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 307627208}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 135.09998, y: -37.057983}
+  m_AnchoredPosition: {x: 121.03, y: -37.057983}
   m_SizeDelta: {x: 386, y: 105.880005}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1767825408
@@ -1501,7 +1533,8 @@ Transform:
   m_LocalPosition: {x: 3.508, y: -2.503, z: 0}
   m_LocalScale: {x: 0.4407, y: 0.4407, z: 0.4407}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 578336348}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &1814482943
@@ -1539,6 +1572,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
   button: {fileID: 121254862}
+  dropPoint: {fileID: 578336347}
 --- !u!61 &1814482945
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1569,7 +1603,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
