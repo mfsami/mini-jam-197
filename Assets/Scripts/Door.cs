@@ -1,11 +1,22 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Door : MonoBehaviour
 {
+    // --- Buttons ---
+    [Header("Buttons / Conditions")]
     public ButtonTrigger button;
-    private bool doorOpen;
+    [SerializeField] LevelManager levelManager;
     
+
+    private bool doorOpen;
+    public bool levelComplete;
+    [SerializeField] private CameraManager cameraManager;
+
+    [SerializeField] BoxCollider2D trigger;   // assign or GetComponent in Awake
+    bool busy = false;
+
 
     public GameObject dropPoint;
     
@@ -14,6 +25,7 @@ public class Door : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        trigger = GetComponent<BoxCollider2D>();
 
     }
 
@@ -23,6 +35,8 @@ public class Door : MonoBehaviour
         // DEBUGGING
         if (Input.GetKeyDown(KeyCode.O)) button.pressed = true;
         if (Input.GetKeyDown(KeyCode.P)) button.pressed = false;
+
+
 
 
         if (button != null)
@@ -39,12 +53,19 @@ public class Door : MonoBehaviour
         }
     }
 
+
+
+
+
     private void OnTriggerEnter2D(Collider2D other)
     {
 
-        if (other.CompareTag("Player") && doorOpen)
+        if (other.CompareTag("Player") && doorOpen && !busy)
         {
-            Debug.Log("NICE WORK BOY!");
+            // prevents re-entry
+            busy = true;
+            if (trigger) trigger.enabled = false;
+
 
             //disable player inputs
             var controller = other.GetComponent<PlayerController>();
@@ -65,7 +86,11 @@ public class Door : MonoBehaviour
             pc.Freeze();                                   // no gliding
             other.transform.position = dropPoint.transform.position;    // snap
             StartCoroutine(DropSequence(pc));
-            Destroy(pc);
+
+            
+
+
+
 
         }
     }
@@ -75,11 +100,25 @@ public class Door : MonoBehaviour
         // already teleported to dropPoint & pc.FreezeNow() called
         var sr = pc.GetComponentInChildren<SpriteRenderer>();
 
-        // Isaac-like sequence
+        
         yield return DropFX.Play(pc.transform, sr, dropPoint.transform.position);
 
-        // done — either load next scene here or unfreeze & respawn elsewhere
+        levelComplete = true;
+
+        // move to next level cam
+        if (cameraManager != null) cameraManager.NextCam();
+
+        // done
         pc.Unfreeze();
+        levelComplete = false;
+        
+        levelManager.AdvanceLevel();
+
+        yield return new WaitForSeconds(0.2f);  // slight delay to avoid overlap
+        busy = false;
+        if (trigger) trigger.enabled = true;
+
+
     }
 
     public static class DropFX
@@ -129,6 +168,9 @@ public class Door : MonoBehaviour
             {
                 t += Time.deltaTime;
                 float a = Mathf.Clamp01(t / fallTime);
+
+                if (target == null) yield break;
+
                 target.position = Vector3.Lerp(peak, end, EaseInQuad(a));
 
                 if (sr) sr.color = new Color(c.r, c.g, c.b, 1f - a);

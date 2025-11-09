@@ -97,8 +97,12 @@ public class PlayerController : MonoBehaviour
 
     public void Unfreeze()
     {
+        if (rb == null) return;
+
         // restore physics
         rb.bodyType = RigidbodyType2D.Dynamic;
+
+        
 
         // ensure we don't resume with leftover momentum
         rb.linearVelocity = Vector2.zero;

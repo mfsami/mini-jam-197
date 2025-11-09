@@ -160,6 +160,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
   button: {fileID: 0}
+  levelComplete: 0
+  cameraManager: {fileID: 0}
   dropPoint: {fileID: 1486062814613631752}
 --- !u!61 &9066829793475097521
 BoxCollider2D:
