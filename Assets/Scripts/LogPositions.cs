@@ -40,6 +40,12 @@ public class LogPositions : MonoBehaviour
     void Awake()
     {
         maxFrames = Mathf.CeilToInt(windowSeconds / Time.fixedDeltaTime);
+
+        // If this script lives on the Player, auto-assign self
+        if (player == null) player = transform;
+
+        // If UI wasn't assigned on the prefab, find it in the scene
+        if (rewindUI == null) rewindUI = FindFirstObjectByType<RewindUI>();
     }
 
     void Update()
