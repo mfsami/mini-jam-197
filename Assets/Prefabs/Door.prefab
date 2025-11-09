@@ -160,9 +160,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
   button: {fileID: 0}
+  buttons: []
+  levelManager: {fileID: 0}
   levelComplete: 0
   cameraManager: {fileID: 0}
+  trigger: {fileID: 0}
   dropPoint: {fileID: 1486062814613631752}
+  doorOpenSFX: {fileID: 8300000, guid: 8186cce7dde528a45ac643b6cf41d5ba, type: 3}
+  doorCloseSFX: {fileID: 8300000, guid: 632f2d6655b30ed48abc1d096024b7be, type: 3}
 --- !u!61 &9066829793475097521
 BoxCollider2D:
   m_ObjectHideFlags: 0

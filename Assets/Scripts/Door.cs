@@ -23,6 +23,10 @@ public class Door : MonoBehaviour
     
     Animator animator;
 
+    // sounds
+
+    [SerializeField] AudioClip doorOpenSFX;
+    [SerializeField] AudioClip doorCloseSFX;
     private void Awake()
     {
         animator = GetComponent<Animator>();
@@ -45,11 +49,13 @@ public class Door : MonoBehaviour
             if (AllButtonsPressed())
             {
                 OpenDoor();
+                
             }
 
             else
             {
                 CloseDoor();
+                
             }
         }
 
@@ -62,6 +68,33 @@ public class Door : MonoBehaviour
             }
         }
         }
+
+    void OpenDoor()
+    {
+        if (doorOpen) return;
+        doorOpen = true;
+
+        // play animation
+        animator.SetBool("Open", true);
+        // enable collider to allow door entrance
+        GetComponent<BoxCollider2D>().enabled = true;
+
+        SFXManager.instance.PlaySFXclip(doorOpenSFX, transform, 1f);
+    }
+
+    void CloseDoor()
+    {
+
+        if (!doorOpen) return;
+        doorOpen = false;
+
+        // play animation
+        animator.SetBool("Open", false);
+        // disable collider to prevent entrance
+        GetComponent<BoxCollider2D>().enabled = false;
+
+        SFXManager.instance.PlaySFXclip(doorCloseSFX, transform, 1f);
+    }
 
     private bool AllButtonsPressed()
     {
@@ -204,26 +237,6 @@ public class Door : MonoBehaviour
     }
 
 
-    void OpenDoor()
-    {
-        // play animation
-        animator.SetBool("Open", true);
-
-        doorOpen = true;
-
-        // enable collider to allow door entrance
-        GetComponent<BoxCollider2D>().enabled = true;
-    }
-
-    void CloseDoor()
-    {
-        // play animation
-        animator.SetBool("Open", false);
-
-        doorOpen = false;
-
-        // disable collider to prevent entrance
-        GetComponent<BoxCollider2D>().enabled = false;
-    }
+    
 
 }

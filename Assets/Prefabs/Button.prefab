@@ -50,6 +50,7 @@ MonoBehaviour:
   activeSprite: {fileID: 21300000, guid: d17d8f4e705fab643be99f9644611620, type: 3}
   inactiveSprite: {fileID: 21300000, guid: 7fdd98b345e24d545a9be1d6e94cb029, type: 3}
   pressed: 0
+  buttonPressSFX: {fileID: 8300000, guid: 7f451057db6a27b4282354e849544a52, type: 3}
 --- !u!58 &3181635779592318804
 CircleCollider2D:
   m_ObjectHideFlags: 0

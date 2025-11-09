@@ -4,6 +4,7 @@ public class GhostFade : MonoBehaviour
 {
     Animator anim;
     [SerializeField] GameObject ownerToDestroy;
+    [SerializeField] AudioClip ghostFadeSFX;
 
     void Awake()
     {
@@ -12,6 +13,7 @@ public class GhostFade : MonoBehaviour
 
     public void PlayFadeAndDestroy()
     {
+        SFXManager.instance.PlaySFXclip(ghostFadeSFX, transform, 1f);
         if (anim)
             anim.SetTrigger("cloneFade");
     }

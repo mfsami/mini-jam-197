@@ -242,10 +242,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LogPositions
   player: {fileID: 1709601435924071685}
   ghostPrefab: {fileID: 1678131269951831503, guid: 44c962ba768c0514e84d0ce2b6108579, type: 3}
-  originPoint: {fileID: 0}
   rewindUI: {fileID: 0}
+  cloneHeadsUI: {fileID: 0}
   windowSeconds: 5
   rewindSeconds: 5
   ghostCap: 3
   ghostTrailPrefab: {fileID: 4366153088726277798, guid: 9031e7258f112a4498bb5e0c6485e81b, type: 3}
   ghostSpawnRate: 0.05
+  rewindSFX: {fileID: 8300000, guid: 4945b84304dff76439db8fbbc4dc1990, type: 3}

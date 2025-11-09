@@ -19,6 +19,10 @@ public class LogPositions : MonoBehaviour
     [SerializeField] private GameObject ghostTrailPrefab;
     [SerializeField] private float ghostSpawnRate = 0.05f;
 
+    [Header("SFX")]
+    [SerializeField] AudioClip rewindSFX;
+    private AudioSource rewindSrc;
+
     private readonly List<Vector3> positions = new();
     private float timerSeconds;
     private float ghostTimer;
@@ -43,6 +47,11 @@ public class LogPositions : MonoBehaviour
         if (!player) player = transform;
         if (!rewindUI) rewindUI = FindFirstObjectByType<RewindUI>();
         if (!cloneHeadsUI) cloneHeadsUI = FindFirstObjectByType<CloneHeadsUI>();
+
+        rewindSrc = gameObject.AddComponent<AudioSource>();
+        rewindSrc.playOnAwake = false;
+        rewindSrc.loop = false;              // single 5s clip
+        rewindSrc.spatialBlend = 0f;
 
     }
 
@@ -82,6 +91,13 @@ public class LogPositions : MonoBehaviour
         isRewinding = true;
         rewindUI?.SetRewindState(true);
 
+        if (rewindSFX)
+        {
+            rewindSrc.clip = rewindSFX;
+            rewindSrc.time = 0f;             // always start at beginning
+            rewindSrc.Play();
+        }
+
         float available = Mathf.Min(windowSeconds, timerSeconds);
         float want = Mathf.Min(rewindSeconds, available);
         int framesToRewind = Mathf.CeilToInt(want / Time.fixedDeltaTime);
@@ -112,6 +128,26 @@ public class LogPositions : MonoBehaviour
         rewindUI?.SetRewindState(false);
         if (controller) controller.inputLocked = false;
         canRewind = true;
+
+        if (rewindSrc.isPlaying)
+            StartCoroutine(FadeOutAudioAndStop(rewindSrc, 0.15f)); // 0.15 = fade duration
+    }
+
+    private IEnumerator FadeOutAudioAndStop(AudioSource src, float fadeTime)
+    {
+        if (src == null) yield break;
+        float startVol = src.volume;
+        float t = 0f;
+
+        while (t < fadeTime)
+        {
+            t += Time.unscaledDeltaTime;
+            src.volume = Mathf.Lerp(startVol, 0f, t / fadeTime);
+            yield return null;
+        }
+
+        src.Stop();
+        src.volume = startVol; // reset for next use
     }
 
     private void SpawnTrail()

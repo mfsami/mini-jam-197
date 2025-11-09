@@ -237,3 +237,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   ownerToDestroy: {fileID: 8428730044351666862}
+  ghostFadeSFX: {fileID: 8300000, guid: 312830b2165827e4c9d286f270e0a2ba, type: 3}

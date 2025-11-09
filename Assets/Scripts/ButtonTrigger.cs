@@ -8,6 +8,8 @@ public class ButtonTrigger : MonoBehaviour
 
     public bool pressed = false;
 
+    [SerializeField] AudioClip buttonPressSFX;
+
     private void Start()
     {
         if (inactiveSprite == null && spriteRenderer != null)
@@ -20,6 +22,7 @@ public class ButtonTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             spriteRenderer.sprite = activeSprite;   // swap sprite
+            SFXManager.instance.PlaySFXclip(buttonPressSFX, transform, 1f);
             pressed = true;
             
         }
