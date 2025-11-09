@@ -10,7 +10,7 @@ public class LogPositions : MonoBehaviour
     public RewindUI rewindUI;
 
     public float windowSeconds = 5f; // recording window
-    public float rewindSeconds = 5f; // how far back to rewind
+    public float rewindSeconds = 3f; // how far back to rewind
 
     private int maxFrames;
     private List<Vector3> positions = new List<Vector3>();
@@ -98,16 +98,20 @@ public class LogPositions : MonoBehaviour
         rewindUI?.SetRewindState(true);
 
         // make a snapshot for ghost before we start rewinding
-        List<Vector3> ghostFrames = new List<Vector3>(positions);
+        //List<Vector3> ghostFrames = new List<Vector3>(positions);
 
-        // how much we can actually rewind (can’t go before time 0)
-        float available = Mathf.Min(windowSeconds, timerSeconds); 
+        // how much we can actually rewind
+        float available = Mathf.Min(windowSeconds, timerSeconds);
         float want = Mathf.Min(rewindSeconds, available);
         int framesToRewind = Mathf.CeilToInt(want / Time.fixedDeltaTime);
 
+        // 2) pick ONLY the last "framesToRewind" frames so the ghost is offset by `want`
+        int start = Mathf.Max(0, positions.Count - framesToRewind);
+        List<Vector3> ghostFrames = positions.GetRange(start, positions.Count - start);
+
         // target time = (now - want); we’ll count DOWN to this while rewinding
         float targetTime = timerSeconds - want;
-        int step = 2;                       
+        int step = 2;                         
         float perStepSeconds = step * Time.fixedDeltaTime;
 
         // play positions backwards and decrement timer
@@ -123,7 +127,7 @@ public class LogPositions : MonoBehaviour
         }
 
         // ghost spawn
-        Transform ghost = Instantiate(ghostPrefab, player.position, Quaternion.identity);
+        Transform ghost = Instantiate(ghostPrefab, ghostFrames[0], Quaternion.identity);
         activeGhosts++;
         StartCoroutine(ReplayGhost(ghost, ghostFrames));
 
