@@ -7,6 +7,7 @@ public class Door : MonoBehaviour
     // --- Buttons ---
     [Header("Buttons / Conditions")]
     public ButtonTrigger button;
+    [SerializeField] private List<ButtonTrigger> buttons = new List<ButtonTrigger>();
     [SerializeField] LevelManager levelManager;
     
 
@@ -39,9 +40,9 @@ public class Door : MonoBehaviour
 
 
 
-        if (button != null)
+        if (button != null && buttons.Count > 0)
         {
-            if (button.pressed)
+            if (AllButtonsPressed())
             {
                 OpenDoor();
             }
@@ -51,6 +52,26 @@ public class Door : MonoBehaviour
                 CloseDoor();
             }
         }
+
+        else
+        {
+            if (button != null)
+            {
+                if (button.pressed) OpenDoor();
+                else CloseDoor();
+            }
+        }
+        }
+
+    private bool AllButtonsPressed()
+    {
+        if (buttons == null || buttons.Count == 0) return false; // no multi set
+        for (int i = 0; i < buttons.Count; i++)
+        {
+            var b = buttons[i];
+            if (b == null || !b.pressed) return false;
+        }
+        return true;
     }
 
 
