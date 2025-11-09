@@ -49,6 +49,13 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (inputLocked)
+        {
+            rb.linearVelocity = Vector2.zero;      
+            if (anim) anim.SetFloat("Speed", 0f);
+            return;                                 
+        }
+
         Vector2 pos = rb.position;
 
         Vector2 desiredVel = Vector2.zero;
@@ -71,6 +78,35 @@ public class PlayerController : MonoBehaviour
         anim.SetFloat("Speed", rb.linearVelocity.magnitude);
 
     }
+
+    public void Freeze()
+    {
+        inputLocked = true;
+        following = false;
+
+        // kill all motion immediately
+        rb.linearVelocity = Vector2.zero;
+        velocityRef = Vector2.zero;
+
+        // pause animation
+        if (anim) anim.SetFloat("Speed", 0f);
+
+        // stop physics from nudging us
+        rb.bodyType = RigidbodyType2D.Kinematic;   
+    }
+
+    public void Unfreeze()
+    {
+        // restore physics
+        rb.bodyType = RigidbodyType2D.Dynamic;
+
+        // ensure we don't resume with leftover momentum
+        rb.linearVelocity = Vector2.zero;
+        velocityRef = Vector2.zero;
+
+        inputLocked = false;
+    }
+
 
     Vector3 GetMouseWorldOnPlayerPlane()
     {
