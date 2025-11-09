@@ -158,7 +158,7 @@ public class LogPositions : MonoBehaviour
 
         if (ghost != null)
             // wait a bit before immedatley destroying
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(4);
             Destroy(ghost.gameObject);
 
         activeGhosts = Mathf.Max(0, activeGhosts - 1);

@@ -1,10 +1,12 @@
 using UnityEngine;
 
-public class SpriteChangeOnTrigger : MonoBehaviour
+public class ButtonTrigger : MonoBehaviour
 {
     public SpriteRenderer spriteRenderer;  
     public Sprite activeSprite;
     public Sprite inactiveSprite;
+
+    public bool pressed = false;
 
     private void Start()
     {
@@ -18,6 +20,8 @@ public class SpriteChangeOnTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             spriteRenderer.sprite = activeSprite;   // swap sprite
+            pressed = true;
+            
         }
 
         
@@ -28,6 +32,8 @@ public class SpriteChangeOnTrigger : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             spriteRenderer.sprite = inactiveSprite;   // swap sprite
+            pressed = false;
+            
         }
     }
 }
