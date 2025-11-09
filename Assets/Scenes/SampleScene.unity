@@ -344,12 +344,12 @@ GameObject:
   - component: {fileID: 385882862}
   - component: {fileID: 385882861}
   m_Layer: 5
-  m_Name: cloneHead (2)
+  m_Name: cloneHead3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &385882860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1519,6 +1519,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1350471489}
+  - component: {fileID: 1350471490}
   m_Layer: 5
   m_Name: CloneHeads
   m_TagString: Untagged
@@ -1545,9 +1546,25 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -82.2, y: -646.7}
+  m_AnchoredPosition: {x: -82.2, y: -652.3204}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1350471490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1350471488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60d55954b805e6c4e94ad8ceefaa89a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CloneHeadsUI
+  heads:
+  - {fileID: 2129416102}
+  - {fileID: 2145025448}
+  - {fileID: 385882859}
 --- !u!1 &1403815769
 GameObject:
   m_ObjectHideFlags: 0
@@ -2465,12 +2482,12 @@ GameObject:
   - component: {fileID: 2129416105}
   - component: {fileID: 2129416104}
   m_Layer: 5
-  m_Name: cloneHead
+  m_Name: cloneHead1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2129416103
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2540,12 +2557,12 @@ GameObject:
   - component: {fileID: 2145025451}
   - component: {fileID: 2145025450}
   m_Layer: 5
-  m_Name: cloneHead (1)
+  m_Name: cloneHead2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2145025449
 RectTransform:
   m_ObjectHideFlags: 0

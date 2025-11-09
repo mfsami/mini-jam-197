@@ -4,197 +4,142 @@ using UnityEngine;
 
 public class LogPositions : MonoBehaviour
 {
-    public Transform player;
-    public Transform ghostPrefab;
-    public Transform originPoint;
-    public RewindUI rewindUI;
+    [Header("References")]
+    [SerializeField] private Transform player;
+    [SerializeField] private Transform ghostPrefab;
+    [SerializeField] private RewindUI rewindUI;
+    [SerializeField] private CloneHeadsUI cloneHeadsUI;
 
-    public float windowSeconds = 5f; // recording window
-    public float rewindSeconds = 3f; // how far back to rewind
-
-    private int maxFrames;
-    private List<Vector3> positions = new List<Vector3>();
-    private bool recording = true;
-    private bool canRewind = true;
-
+    [Header("Rewind Settings")]
+    [SerializeField] private float windowSeconds = 5f;
+    [SerializeField] private float rewindSeconds = 5f;
     [SerializeField] private int ghostCap = 3;
-    private int activeGhosts = 0;
 
-    // UI Stuff
-    private float timerSeconds = 0f;
-    private bool isRewinding = false;
-
-
-    // ghost trail stuff
+    [Header("Trail Settings")]
     [SerializeField] private GameObject ghostTrailPrefab;
     [SerializeField] private float ghostSpawnRate = 0.05f;
-    private float ghostTimer;
 
-    void Start()
+    private readonly List<Vector3> positions = new();
+    private float timerSeconds;
+    private float ghostTimer;
+    private int maxFrames;
+    private int activeGhosts;
+    private bool recording = true;
+    private bool canRewind = true;
+    private bool isRewinding;
+
+    private static readonly Color[] TrailColors =
     {
-        // show REC on boot
-        rewindUI?.SetRewindState(false);
-        rewindUI?.SetTimerSeconds(timerSeconds);
-    }
+        new(1f, 0.31f, 0.64f, 0.47f),
+        new(0f, 1f, 1f, 0.47f),
+        new(0.64f, 0.42f, 1f, 0.47f),
+        new(1f, 0.84f, 0.04f, 0.47f),
+        new(0.25f, 1f, 0.5f, 0.47f)
+    };
 
     void Awake()
     {
         maxFrames = Mathf.CeilToInt(windowSeconds / Time.fixedDeltaTime);
+        if (!player) player = transform;
+        if (!rewindUI) rewindUI = FindFirstObjectByType<RewindUI>();
+        if (!cloneHeadsUI) cloneHeadsUI = FindFirstObjectByType<CloneHeadsUI>();
 
-        // If this script lives on the Player, auto-assign self
-        if (player == null) player = transform;
+    }
 
-        // If UI wasn't assigned on the prefab, find it in the scene
-        if (rewindUI == null) rewindUI = FindFirstObjectByType<RewindUI>();
+    void Start()
+    {
+        rewindUI?.SetRewindState(false);
+        rewindUI?.SetTimerSeconds(timerSeconds);
+        cloneHeadsUI?.SetCount(0);
     }
 
     void Update()
     {
-
-        // count up continuously while not rewinding
         if (!isRewinding)
         {
             timerSeconds += Time.deltaTime;
             rewindUI?.SetTimerSeconds(timerSeconds);
         }
 
-
         if (Input.GetMouseButtonDown(1) && positions.Count > 0 && canRewind && activeGhosts < ghostCap)
-        {
-
             StartCoroutine(RewindAndSpawnGhost());
-
-        }
     }
 
     void FixedUpdate()
     {
         if (!recording) return;
-
-        // record positions 
         positions.Add(player.position);
-
-        // keep only last 20 seconds
-        if (positions.Count > maxFrames)
-            positions.RemoveAt(0);
+        if (positions.Count > maxFrames) positions.RemoveAt(0);
     }
 
     private IEnumerator RewindAndSpawnGhost()
     {
-        //disable player inputs
         var controller = player.GetComponent<PlayerController>();
-
-        if (controller != null)
-        {
-            controller.inputLocked = true; 
-        }
-
+        if (controller) controller.inputLocked = true;
 
         canRewind = false;
         recording = false;
         isRewinding = true;
-
-        // set rewind ui
         rewindUI?.SetRewindState(true);
 
-        // make a snapshot for ghost before we start rewinding
-        //List<Vector3> ghostFrames = new List<Vector3>(positions);
-
-        // how much we can actually rewind
         float available = Mathf.Min(windowSeconds, timerSeconds);
         float want = Mathf.Min(rewindSeconds, available);
         int framesToRewind = Mathf.CeilToInt(want / Time.fixedDeltaTime);
 
-        // 2) pick ONLY the last "framesToRewind" frames so the ghost is offset by `want`
         int start = Mathf.Max(0, positions.Count - framesToRewind);
-        List<Vector3> ghostFrames = positions.GetRange(start, positions.Count - start);
-
-        // target time = (now - want); we’ll count DOWN to this while rewinding
+        var ghostFrames = positions.GetRange(start, positions.Count - start);
         float targetTime = timerSeconds - want;
-        int step = 2;                         
-        float perStepSeconds = step * Time.fixedDeltaTime;
+        float stepTime = 2 * Time.fixedDeltaTime;
 
-        // play positions backwards and decrement timer
-        for (int i = positions.Count - 1; i >= Mathf.Max(0, positions.Count - framesToRewind); i-= step)
+        for (int i = positions.Count - 1; i >= start; i -= 2)
         {
             player.position = positions[i];
-            GhostTrail();
-            // countdown the UI timer toward target
-            timerSeconds = Mathf.Max(targetTime, timerSeconds - perStepSeconds);
+            SpawnTrail();
+            timerSeconds = Mathf.Max(targetTime, timerSeconds - stepTime);
             rewindUI?.SetTimerSeconds(timerSeconds);
-
             yield return new WaitForFixedUpdate();
         }
 
-        // ghost spawn
+        // spawn ghost
         Transform ghost = Instantiate(ghostPrefab, ghostFrames[0], Quaternion.identity);
         activeGhosts++;
+        cloneHeadsUI?.SetCount(activeGhosts);
         StartCoroutine(ReplayGhost(ghost, ghostFrames));
 
-        // clear & resume recording
         positions.Clear();
         recording = true;
         isRewinding = false;
-
-        // set back to rec
         rewindUI?.SetRewindState(false);
-
-        // unlock inputs
-        controller.inputLocked = false;
-
+        if (controller) controller.inputLocked = false;
         canRewind = true;
     }
 
-    private static readonly Color[] SandivistanPalette = {
-        new Color32(255, 79, 163, 120),  // Neon pink
-        new Color32(0, 255, 255, 120),   // Cyan
-        new Color32(163, 106, 255, 120), // Violet
-        new Color32(255, 214, 10, 120),  // Yellow
-        new Color32(64, 255, 128, 120)   // Mint green
-    };
-    private void GhostTrail()
+    private void SpawnTrail()
     {
-        // spawn the ghost trail every few frames
         ghostTimer += Time.deltaTime;
-        if (ghostTimer >= ghostSpawnRate)
-        {
-            var ghost = Instantiate(ghostTrailPrefab, player.position, Quaternion.identity);
-            var sr = ghost.GetComponent<SpriteRenderer>();
-
-            Color c = SandivistanPalette[Random.Range(0, SandivistanPalette.Length)];
-            sr.color = c;
-
-            ghostTimer = 0f;
-        }
+        if (ghostTimer < ghostSpawnRate) return;
+        var trail = Instantiate(ghostTrailPrefab, player.position, Quaternion.identity);
+        trail.GetComponent<SpriteRenderer>().color = TrailColors[Random.Range(0, TrailColors.Length)];
+        ghostTimer = 0f;
     }
 
     private IEnumerator ReplayGhost(Transform ghost, List<Vector3> frames)
     {
-        // play the ghost forward
-        for (int i = 0; i < frames.Count; i++)
+        foreach (var frame in frames)
         {
-            if (ghost == null) yield break;
-            ghost.position = frames[i];
+            if (!ghost) yield break;
+            ghost.position = frame;
             yield return new WaitForFixedUpdate();
         }
 
-        if (ghost != null)
-        {
-            // Wait before starting fade
-            yield return new WaitForSeconds(4);
+        if (!ghost) yield break;
+        yield return new WaitForSeconds(4);
 
+        var fade = ghost.GetComponentInChildren<GhostFade>();
+        if (fade) fade.PlayFadeAndDestroy();
+        else Destroy(ghost.gameObject);
 
-            var fade = ghost.GetComponentInChildren<GhostFade>();
-            if (fade != null)
-            {
-                fade.PlayFadeAndDestroy();    // plays animation, then DestroySelf() event runs
-            }
-            else
-            {
-                Destroy(ghost.gameObject);    // fallback in case no animator
-            }
-        }
-
-            activeGhosts = Mathf.Max(0, activeGhosts - 1);
+        activeGhosts = Mathf.Max(0, activeGhosts - 1);
+        cloneHeadsUI?.SetCount(activeGhosts);
     }
 }
