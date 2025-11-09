@@ -175,10 +175,22 @@ public class LogPositions : MonoBehaviour
         }
 
         if (ghost != null)
-            // wait a bit before immedatley destroying
+        {
+            // Wait before starting fade
             yield return new WaitForSeconds(4);
-            Destroy(ghost.gameObject);
 
-        activeGhosts = Mathf.Max(0, activeGhosts - 1);
+
+            var fade = ghost.GetComponentInChildren<GhostFade>();
+            if (fade != null)
+            {
+                fade.PlayFadeAndDestroy();    // plays animation, then DestroySelf() event runs
+            }
+            else
+            {
+                Destroy(ghost.gameObject);    // fallback in case no animator
+            }
+        }
+
+            activeGhosts = Mathf.Max(0, activeGhosts - 1);
     }
 }

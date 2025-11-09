@@ -32,10 +32,6 @@ public class GhostController : MonoBehaviour
             else if (dx < -0.05f) sr.flipX = true;
         }
 
-        anim.SetFloat("Speed", rbSpeed);
-
-
-
         lastPos = transform.position;
     }
 }
