@@ -159,6 +159,25 @@ public class Door : MonoBehaviour
 
         levelComplete = true;
 
+        // check if last level
+        //if (levelManager.levelIndex >= levelManager.spawnPoints.Length - 1)
+        //{
+        //    // If it's the last level, go back to the very first camera (title)
+        //    if (cameraManager != null) cameraManager.GoTo(0);
+
+            
+        //    pc.Freeze();
+        //    LogPositions.canRewind = false;
+
+        //    // optional: reset level index if you want to replay
+        //    levelManager.levelIndex = 0;
+
+        //    yield return new WaitForSeconds(0.5f);
+        //    busy = false;
+        //    if (trigger) trigger.enabled = true;
+        //    yield break; // stop here — don't advance further
+        //}
+
         // move to next level cam
         if (cameraManager != null) cameraManager.NextCam();
 

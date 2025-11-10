@@ -3,10 +3,10 @@ using UnityEngine;
 public class LevelManager : MonoBehaviour
 {
     [SerializeField] PlayerController playerPrefab;
-    [SerializeField] Transform[] spawnPoints;     
+    [SerializeField] public Transform[] spawnPoints;     
     [SerializeField] CameraManager cameraManager;
 
-    int levelIndex = 0;
+    public int levelIndex = 0;
     PlayerController currentPlayer;
 
 
@@ -16,15 +16,18 @@ public class LevelManager : MonoBehaviour
         SpawnAt(levelIndex);
 
         // ensure cam 0 is active
-        cameraManager.GoTo(levelIndex);
+        
     }
+    
+    public bool IsLastLevel() => levelIndex >= spawnPoints.Length - 1;
+
 
     public void AdvanceLevel()
     {
         levelIndex = Mathf.Min(levelIndex + 1, spawnPoints.Length - 1);
         if (currentPlayer != null) Destroy(currentPlayer.gameObject);
         SpawnAt(levelIndex);
-        cameraManager.GoTo(levelIndex);
+        
     }
 
     void SpawnAt(int idx)

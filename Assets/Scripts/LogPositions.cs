@@ -29,7 +29,7 @@ public class LogPositions : MonoBehaviour
     private int maxFrames;
     private int activeGhosts;
     private bool recording = true;
-    private bool canRewind = true;
+    public static bool canRewind = false;
     private bool isRewinding;
 
     private static readonly Color[] TrailColors =
