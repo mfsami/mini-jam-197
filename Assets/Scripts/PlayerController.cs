@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 targetPos;            // world-space target (mouse)
     private bool following;               // only follow while holding LMB
 
-    public bool inputLocked = false;
+    public bool inputLocked;
 
     private Animator anim;
 
